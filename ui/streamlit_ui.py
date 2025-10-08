@@ -63,7 +63,7 @@ def run_streamlit_app():
         # Process the user's message with the ADK agent and display the response.
         with st.chat_message('assistant'):
             message_placeholder = st.empty() # Create an empty placeholder to update with the assistant's response.
-            with st.spinner('Assistant is thinking...'): # Show a spinner while the agent processes the request.
+            with st.spinner('Assistant is thinking...', show_time = True): # Show a spinner while the agent processes the request.
                 print(f"DEBUG UI: Sending message to ADK with session ID: {current_session_id}")
 
                 agent_response = run_adk_sync(adk_runner, current_session_id, prompt + f'\nInput: {st.session_state.file}') # Call the synchronous ADK runner.
