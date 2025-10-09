@@ -154,7 +154,6 @@ def run_streamlit_app():
 
                 agent_response = run_adk_sync(adk_runner, current_session_id, f'Translate the following text, use the translater sub-agent: {content_to_translate}') # Call the synchronous ADK runner.
                 print(f"DEBUG UI: Received response from ADK: {agent_response[:50]}...")
-                # Removed: message_placeholder.markdown(agent_response) # Avoid direct writing here
 
                 st.session_state.translation = agent_response
                 st.session_state.viewing = 'translation' # Set the view state
