@@ -3,58 +3,6 @@ import streamlit as st
 from services.adk_service import initialize_adk, run_adk_sync
 from config.settings import MESSAGE_HISTORY_KEY, get_api_key
 
-def get_html_content():
-    return """
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@900&display=swap" rel="stylesheet">
-
-    <style>
-    /* Define the radiant yellow color and the glowing text shadow */
-    .sunset-glow {
-    /* Base color: A bright, whitish yellow */
-    color: #FFD966; 
-    
-    /* Apply a series of text shadows to create the intense, radiant glow */
-    text-shadow: 
-        0 0 8px #FFFFFF,      /* 1. Brightest inner core (pure white) */
-        0 0 15px #FFD966,     /* 2. Main color glow */
-        0 0 30px #FFC04D,     /* 3. Deeper yellow-gold contrast */
-        0 0 60px rgba(255, 217, 102, 0.7); /* 4. Wide, soft outer glow with transparency */
-    }
-
-    /* Ensure the title is left-aligned and uses the bold Inter font */
-    .title-container {
-    font-family: 'Inter', sans-serif;
-    text-align: left; /* CHANGED: Aligned title to the left */
-    /* Prevent Cumulative Layout Shift by setting a minimum height */
-    min-height: 150px; /* Increased height for the massive text */
-    padding: 20px 0;
-    }
-
-    /* Custom Sizing for the H1 element: Massive Font */
-    .title-container h1 {
-    /* Mobile/Default Size: Large enough for mobile but won't break the layout */
-    font-size: 4.5rem; /* ~72px */
-    line-height: 1.1;
-    }
-
-    /* Desktop Size: Roughly twice the previous 8xl size (which was 6rem) */
-    @media (min-width: 1024px) { /* Applies to large screens and up */
-    .title-container h1 {
-        font-size: 4rem; /* ~192px */
-        line-height: 1;
-    }
-    }
-    </style>
-
-    <div class="title-container">
-      <h1 class="sunset-glow text-6xl sm:text-7xl lg:text-8xl font-extrabold tracking-tight">
-        Aura
-      </h1>
-    </div>
-    """
-
-
 def run_streamlit_app():
     '''
     Sets up and runs the Streamlit web application for the ADK chat assistant.
@@ -74,11 +22,8 @@ def run_streamlit_app():
 
     st.set_page_config(page_title='Aura', layout='wide') # Configures the browser tab title and page layout.
 
-    # Render the custom component in Streamlit
-    st.markdown(get_html_content(), unsafe_allow_html=True)
-    st.caption('Making the world a better place') # Descriptive text.
-    
-    
+    # Render the logo
+    st.image('ui/assets/logo.png', width = 700)
 
     
     api_key = get_api_key() # Retrieve the API key from settings.
