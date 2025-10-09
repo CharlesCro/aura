@@ -30,23 +30,69 @@ def run_streamlit_app():
     '''
     print(f"DEBUG UI: Using ADK session ID: {current_session_id}")
 
-    ## < -- PLACEHOLDER CODE -- >
-    
-    uploaded_file = st.file_uploader("Upload a file (e.g., an image or PDF)", type=None)
+    ## < -- File Upload Section -- >
+    file = st.file_uploader("Upload a file", type=['pdf'])
 
-    if uploaded_file is not None:
-        reader = PdfReader(uploaded_file)
+    if file and (st.session_state.file_name is None or file.name != st.session_state.file_name):
+        reader = PdfReader(file)
 
         texts = []
         for page in reader.pages:
-
             text = page.extract_text()
-
             texts.append(text.replace('\n', ''))
+            texts.append('\n\n')
 
-        st.session_state.file = ' '.join(texts)
+        st.session_state.file_name = file.name
+        st.session_state.file_text = ' '.join(texts)
+        st.session_state.summary = None
+        st.session_state.translation = None
+        st.session_state.status = f'File Uploaded: {file.name}'
 
+        st.session_state.viewing = 'file_text'
 
+    
+    ## < -- Options Section -- >
+    col1, col2, col3, col4, _ = st.columns([1, 1, 1, 1, 12], vertical_alignment = 'center')
+
+    if col1.button('Original File'):
+        if st.session_state.file_name:
+            st.write(st.session_state.file_text)
+
+    if col2.button('Summary') and st.session_state.file_text:
+        if st.session_state.summary:
+            st.session_state.viewing = 'summary'
+        else:
+            message_placeholder = st.empty() # Create an empty placeholder to update with the assistant's response.
+            with st.spinner('Assistant is thinking...', show_time = True): # Show a spinner while the agent processes the request.
+                print(f"DEBUG UI: Sending message to ADK with session ID: {current_session_id}")
+
+                agent_response = run_adk_sync(adk_runner, current_session_id, f'Summarize the following text: {st.session_state[st.session_state.viewing]}') # Call the synchronous ADK runner.
+                print(f"DEBUG UI: Received response from ADK: {agent_response[:50]}...")
+
+                st.session_state.summary = agent_response
+                st.session_state.viewing = 'summary'
+
+    if col3.button('Translate') and st.session_state.viewing:
+        if st.session_state.translation:
+            st.session_state.viewing = 'translation'
+        else:
+            message_placeholder = st.empty() # Create an empty placeholder to update with the assistant's response.
+            with st.spinner('Assistant is thinking...', show_time = True): # Show a spinner while the agent processes the request.
+                print(f"DEBUG UI: Sending message to ADK with session ID: {current_session_id}")
+
+                agent_response = run_adk_sync(adk_runner, current_session_id, f'Translate the following text: {st.session_state[st.session_state.viewing]}') # Call the synchronous ADK runner.
+                print(f"DEBUG UI: Received response from ADK: {agent_response[:50]}...")
+                message_placeholder.markdown(agent_response) # Update the placeholder with the final response.
+
+                st.session_state.translation = agent_response
+    
+    ## < -- View Window -- >
+    if st.session_state.viewing:
+        col4.download_button('Download', data = st.session_state[st.session_state.viewing], file_name = f'{st.session_state.file_name.split('.')[0]}.md')
+
+        st.markdown(st.session_state[st.session_state.viewing])
+
+    '''
      # Initialize chat message history in Streamlit's session state if it doesn't exist.
     if MESSAGE_HISTORY_KEY not in st.session_state:
         st.session_state[MESSAGE_HISTORY_KEY] = []
@@ -72,3 +118,4 @@ def run_streamlit_app():
         
         # Append assistant's response to history.
         st.session_state[MESSAGE_HISTORY_KEY].append({'role': 'assistant', 'content': agent_response})
+        '''
