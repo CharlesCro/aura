@@ -9,6 +9,17 @@ def run_streamlit_app():
     Sets up and runs the Streamlit web application for the ADK chat assistant.
     '''
     
+    # Initialize session state variables if they don't exist
+    if 'file_name' not in st.session_state:
+        st.session_state.file_name = None
+    if 'file_text' not in st.session_state:
+        st.session_state.file_text = None
+    if 'summary' not in st.session_state:
+        st.session_state.summary = None
+    if 'translation' not in st.session_state:
+        st.session_state.translation = None
+    if 'viewing' not in st.session_state:
+        st.session_state.viewing = None
 
     st.set_page_config(page_title='Aura', layout='wide') # Configures the browser tab title and page layout.
     st.title(':blue[Aura]') # Main title of the app.
@@ -48,49 +59,65 @@ def run_streamlit_app():
         st.session_state.translation = None
         st.session_state.status = f'File Uploaded: {file.name}'
 
-        st.session_state.viewing = 'file_text'
+        st.session_state.viewing = 'file_text' # Set the initial view to the original file
 
-    
+    st.divider()
     ## < -- Options Section -- >
-    col1, col2, col3, col4, _ = st.columns([1, 1, 1, 1, 12], vertical_alignment = 'center')
+    col1, col2, col3, col4, _ = st.columns([1, 1, 1, 1, 32], vertical_alignment = 'center')
 
-    if col1.button('Original File'):
+    if col1.button(':material/library_books:', type = 'tertiary'):
         if st.session_state.file_name:
-            st.write(st.session_state.file_text)
+            st.session_state.viewing = 'file_text'
 
-    if col2.button('Summary') and st.session_state.file_text:
+
+    if col2.button(':material/planner_review:', type = 'tertiary') and st.session_state.file_text:
         if st.session_state.summary:
             st.session_state.viewing = 'summary'
         else:
-            message_placeholder = st.empty() # Create an empty placeholder to update with the assistant's response.
+            # message_placeholder = st.empty() # Placeholder isn't needed here as content is written to main viewing area
             with st.spinner('Assistant is thinking...', show_time = True): # Show a spinner while the agent processes the request.
                 print(f"DEBUG UI: Sending message to ADK with session ID: {current_session_id}")
 
-                agent_response = run_adk_sync(adk_runner, current_session_id, f'Summarize the following text: {st.session_state[st.session_state.viewing]}') # Call the synchronous ADK runner.
+                agent_response = run_adk_sync(adk_runner, current_session_id, f'Summarize the following Philosophy chapter, user the summarizer sub-agent: {st.session_state.file_text}') # Call the synchronous ADK runner.
                 print(f"DEBUG UI: Received response from ADK: {agent_response[:50]}...")
 
                 st.session_state.summary = agent_response
-                st.session_state.viewing = 'summary'
+                st.session_state.viewing = 'summary' # Set the view state
 
-    if col3.button('Translate') and st.session_state.viewing:
+
+    if col3.button(':material/translate:', type = 'tertiary') and st.session_state.file_text: # Check file_text existence to enable the button
         if st.session_state.translation:
             st.session_state.viewing = 'translation'
         else:
-            message_placeholder = st.empty() # Create an empty placeholder to update with the assistant's response.
+            # message_placeholder = st.empty() # Placeholder isn't needed here as content is written to main viewing area
             with st.spinner('Assistant is thinking...', show_time = True): # Show a spinner while the agent processes the request.
                 print(f"DEBUG UI: Sending message to ADK with session ID: {current_session_id}")
+                
+                # Check which content to translate: the current view content or just the file text if no view is set
+                content_to_translate = st.session_state[st.session_state.viewing] if st.session_state.viewing else st.session_state.file_text
 
-                agent_response = run_adk_sync(adk_runner, current_session_id, f'Translate the following text: {st.session_state[st.session_state.viewing]}') # Call the synchronous ADK runner.
+                agent_response = run_adk_sync(adk_runner, current_session_id, f'Translate the following text, use the translater sub-agent: {content_to_translate}') # Call the synchronous ADK runner.
                 print(f"DEBUG UI: Received response from ADK: {agent_response[:50]}...")
-                message_placeholder.markdown(agent_response) # Update the placeholder with the final response.
+                # Removed: message_placeholder.markdown(agent_response) # Avoid direct writing here
 
                 st.session_state.translation = agent_response
+                st.session_state.viewing = 'translation' # Set the view state
     
-    ## < -- View Window -- >
-    if st.session_state.viewing:
-        col4.download_button('Download', data = st.session_state[st.session_state.viewing], file_name = f'{st.session_state.file_name.split('.')[0]}.md')
+    st.divider()
+    ## < -- Viewing -- >
+    # This section now *solely* controls what is displayed based on st.session_state.viewing
+    if st.session_state.viewing and st.session_state[st.session_state.viewing]:
+        # Only show the download button if there is content to download
+        col4.download_button(
+            ':material/download:', 
+            data = st.session_state[st.session_state.viewing], 
+            file_name = f'{st.session_state.viewing} - {st.session_state.file_name.split(".")[0]}.md',
+            type = 'tertiary'
+        )
 
         st.markdown(st.session_state[st.session_state.viewing])
+
+        st.divider()
 
     '''
      # Initialize chat message history in Streamlit's session state if it doesn't exist.

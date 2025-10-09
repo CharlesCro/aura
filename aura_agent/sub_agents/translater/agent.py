@@ -1,4 +1,6 @@
-from google.genai import Client
+from google.adk.agents import Agent
+from google.genai import types
+
 from config.settings import MODEL_GEMINI
 
 # The instruction from your original agent, which will be the tool's system prompt
@@ -27,18 +29,12 @@ You will make an assumption on what the target language is depending on the inpu
 The final output must contain **only** the translated text.
 """
 
-def translate_text(text_to_translate: str) -> str:
-    """
-    Analyzes a block of text and produces a concise, structured academic summary.
-    """
-    client = Client()
-    translation_response = client.models.generate_content(
-        model=MODEL_GEMINI,
-        contents=[text_to_translate],
-        system_instruction = TRANSLATER_INSTRUCTION
-    )
-    # Close the sync client to release resources.
-    client.close()
+
+translater = Agent(
+    model = MODEL_GEMINI,
+    name = 'translater',
+    description = 'An academic translater specializing in philosophical texts.',
+    generate_content_config=types.GenerateContentConfig(temperature = 0.1),
+    instruction = TRANSLATER_INSTRUCTION
+)
     
-    # Return only the string content.
-    return translation_response.text
