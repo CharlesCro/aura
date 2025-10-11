@@ -22,6 +22,7 @@ def run_streamlit_app():
 
     st.set_page_config(page_title='Aura', layout='wide') # Configures the browser tab title and page layout.
     st.title('Aura')
+    st.divider()
     # Render the logo
     # st.image('ui/assets/logo.png', width = 700)
 
@@ -43,8 +44,9 @@ def run_streamlit_app():
     print(f"DEBUG UI: Using ADK session ID: {current_session_id}")
 
     with st.sidebar:
+        st.divider()
         ## < -- File Upload Section -- >
-        file = st.file_uploader("Upload a file", type=['pdf'])
+        file = st.file_uploader("", type=['pdf'], label_visibility= 'collapsed')
 
         if file and (st.session_state.file_name is None or file.name != st.session_state.file_name):
             reader = PdfReader(file)
@@ -62,6 +64,8 @@ def run_streamlit_app():
             st.session_state.status = f'File Uploaded: {file.name}'
 
             st.session_state.viewing = 'file_text' # Set the initial view to the original file
+        
+        st.divider()
 
     ## < -- Options Section -- >
     col1, col2, col3, col4, _ = st.columns([1, 1, 1, 1, 32], vertical_alignment = 'center')
@@ -117,11 +121,14 @@ def run_streamlit_app():
                     type = 'tertiary'
                 )
 
-                st.header(f'{st.session_state.viewing.title().replace('File_', 'Original ')}', divider = 'blue')
+                st.header(f'{st.session_state.viewing.title().replace('File_', 'Original ')}', divider = 'grey')
 
                 st.markdown(st.session_state[st.session_state.viewing])
 
                 st.divider()
+
+        with view_col2:
+            st.info('New Feature Coming Soon', width = 220)
 
     '''
      # Initialize chat message history in Streamlit's session state if it doesn't exist.
