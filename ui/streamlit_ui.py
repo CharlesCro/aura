@@ -21,9 +21,9 @@ def run_streamlit_app():
         st.session_state.viewing = None
 
     st.set_page_config(page_title='Aura', layout='wide') # Configures the browser tab title and page layout.
-
+    st.title('Aura')
     # Render the logo
-    st.image('ui/assets/logo.png', width = 700)
+    # st.image('ui/assets/logo.png', width = 700)
 
     
     api_key = get_api_key() # Retrieve the API key from settings.
