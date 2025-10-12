@@ -3,6 +3,14 @@ import streamlit as st
 from services.adk_service import initialize_adk, run_adk_sync
 from config.settings import MESSAGE_HISTORY_KEY, get_api_key
 
+@st.dialog('View/Edit Fields')
+def field():
+    options = st.multiselect(
+        "What are your favorite colors?",
+        ["Science", "Philosophy", 'Math', 'History', 'Economics', 'Medicine', 'Art']
+    )
+    
+
 def run_streamlit_app():
     '''
     Sets up and runs the Streamlit web application for the ADK chat assistant.
@@ -22,13 +30,6 @@ def run_streamlit_app():
 
     st.set_page_config(page_title='Aura', layout='wide') # Configures the browser tab title and page layout.
     
-    # Render the logo
-    col1, col2, _ = st.columns([1, 4, 13], vertical_alignment='bottom')
-    col1.image('ui/assets/logo_aura.png', width = 75)
-    col2.title('AuraWeb') # Main title of the app.
-    st.caption('Powered by ADK & Gemini') # Descriptive text.
-    st.divider()
-    
     api_key = get_api_key() # Retrieve the API key from settings.
     if not api_key:
         st.error('Action Required: Google API Key Not Found or Invalid! Please set GOOGLE_API_KEY in your .env file. ⚠️')
@@ -37,15 +38,41 @@ def run_streamlit_app():
     adk_runner, current_session_id = initialize_adk()
     
     # Display session ID for debugging purposes
-    '''st.sidebar.title('Info')
-    st.sidebar.divider()
-    st.sidebar.info(
-        current_session_id
-    )
-    '''
     print(f"DEBUG UI: Using ADK session ID: {current_session_id}")
 
+
+    # Top Section
+    col1, col2 = st.columns(2)
+    
+    with col1:
+        st.write('')
+        video_file = open('ui/assets/globe.mp4', 'rb')
+        video_bytes = video_file.read()
+
+        st.video(video_bytes, autoplay = True, loop = True)
+
+    with col2:
+        if st.button(':material/edit: View/Edit Fields'):
+            field()
+        st.divider()
+        st.markdown("""
+**First Human Heart Transplant:** Dr. Christiaan Barnard and his team performed the world's first successful human heart transplantation in Cape Town, South Africa (December 3). Though the patient survived only 18 days, the operation marked a major medical milestone.
+
+**Discovery of Pulsars:** Radio astronomers Jocelyn Bell Burnell and Antony Hewish discovered the first pulsar (a rapidly rotating neutron star emitting beams of electromagnetic radiation) in November, a finding that fundamentally advanced the field of astrophysics.
+
+**Venera 4 Probe Reaches Venus:** The Soviet Union's Venera 4 probe successfully entered the atmosphere of Venus on October 18, transmitting the first direct data about the planet's atmospheric composition, temperature, and pressure.
+
+""")    
+        st.divider()
+
+    # Timeline
+    st.slider('Timeline', min_value = 0, max_value = 2025, value = 1967)
+
+    # Sidebar section
     with st.sidebar:
+        st.logo('ui/assets/logo_aura.png', size = 'large')
+        st.title('Welcome to AuraWeb')
+        st.caption('Making the world a better place')
         st.divider()
         ## < -- File Upload Section -- >
         file = st.file_uploader("", type=['pdf'], label_visibility= 'collapsed')
@@ -72,10 +99,10 @@ def run_streamlit_app():
         # Configuration Options
 
         # Response length control
-        st.slider(label = 'Response Length')
+        response_length = st.slider(label = 'Response Length (:material/numbers: pages)', min_value = 1, max_value = 5)
 
         # Temperature control
-        temperature = st.radio(
+        response_type = st.radio(
                                 "Please select desired output format",
                                 ["Bullet Points", "Essay"],
                                 captions=[
