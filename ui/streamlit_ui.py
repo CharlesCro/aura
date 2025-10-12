@@ -21,11 +21,13 @@ def run_streamlit_app():
         st.session_state.viewing = None
 
     st.set_page_config(page_title='Aura', layout='wide') # Configures the browser tab title and page layout.
-    st.title('Aura')
-    st.divider()
+    
     # Render the logo
-    # st.image('ui/assets/logo.png', width = 700)
-
+    col1, col2, _ = st.columns([1, 4, 13], vertical_alignment='bottom')
+    col1.image('ui/assets/logo_aura.png', width = 75)
+    col2.title('AuraWeb') # Main title of the app.
+    st.caption('Powered by ADK & Gemini') # Descriptive text.
+    st.divider()
     
     api_key = get_api_key() # Retrieve the API key from settings.
     if not api_key:
@@ -66,6 +68,21 @@ def run_streamlit_app():
             st.session_state.viewing = 'file_text' # Set the initial view to the original file
         
         st.divider()
+
+        # Configuration Options
+
+        # Response length control
+        st.slider(label = 'Response Length')
+
+        # Temperature control
+        temperature = st.radio(
+                                "Please select desired output format",
+                                ["Bullet Points", "Essay"],
+                                captions=[
+                                    "Brief overview of the major points & short sentences.",
+                                    "Medium-long paragraphs exploring each point thoroughly.",
+                                ]
+        )
 
     ## < -- Options Section -- >
     col1, col2, col3, col4, _ = st.columns([1, 1, 1, 1, 32], vertical_alignment = 'center')
