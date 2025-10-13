@@ -1,12 +1,15 @@
 from pypdf import PdfReader
 import streamlit as st
+import numpy as np
+
+from utils.globe import Globe
 from services.adk_service import initialize_adk, run_adk_sync
 from config.settings import MESSAGE_HISTORY_KEY, get_api_key
 
 @st.dialog('View/Edit Fields')
 def field():
     options = st.multiselect(
-        "What are your favorite colors?",
+        "Please select the educational fields you are working with.",
         ["Science", "Philosophy", 'Math', 'History', 'Economics', 'Medicine', 'Art']
     )
     
@@ -27,6 +30,8 @@ def run_streamlit_app():
         st.session_state.translation = None
     if 'viewing' not in st.session_state:
         st.session_state.viewing = None
+    if 'year' not in st.session_state:
+        st.session_state.year = None
 
     st.set_page_config(page_title='Aura', layout='wide') # Configures the browser tab title and page layout.
     
@@ -40,33 +45,51 @@ def run_streamlit_app():
     # Display session ID for debugging purposes
     print(f"DEBUG UI: Using ADK session ID: {current_session_id}")
 
-
     # Top Section
     col1, col2 = st.columns(2)
     
     with col1:
-        st.write('')
-        video_file = open('ui/assets/globe.mp4', 'rb')
-        video_bytes = video_file.read()
+        # Display Globe
+        # --- Example Data Generation ---
+        N = 15
+        np.random.seed(42)
+        custom_lat = np.random.uniform(-90, 90, N)
+        custom_lon = np.random.uniform(-180, 180, N)
 
-        st.video(video_bytes, autoplay = True, loop = True)
+        # 1. Initialize the globe object (assuming ne_50m_land.shp is in the directory)
+        # Using the 50m data as recommended for stability
+        globe = Globe(land_color='rgb(117, 45, 55)')
+
+        # 2. Create the initial figure object
+        fig = globe.create_figure()
+
+        # 3. Update the scatter data with your custom points
+        globe.update_scatter_data(
+            lon_deg=custom_lon, 
+            lat_deg=custom_lat, 
+            marker_color='rgb(108, 140, 123)', 
+            marker_size=6
+        )
+
+        st.plotly_chart(fig, config = {'displayModeBar': False})
 
     with col2:
         if st.button(':material/edit: View/Edit Fields'):
             field()
-        st.divider()
+        st.subheader(f'See what happened in your fields during :grey[{st.session_state.year}]', divider = 'grey')
         st.markdown("""
-**First Human Heart Transplant:** Dr. Christiaan Barnard and his team performed the world's first successful human heart transplantation in Cape Town, South Africa (December 3). Though the patient survived only 18 days, the operation marked a major medical milestone.
+- **First Human Heart Transplant:** Dr. Christiaan Barnard and his team performed the world's first successful human heart transplantation in Cape Town, South Africa (December 3). Though the patient survived only 18 days, the operation marked a major medical milestone.
 
-**Discovery of Pulsars:** Radio astronomers Jocelyn Bell Burnell and Antony Hewish discovered the first pulsar (a rapidly rotating neutron star emitting beams of electromagnetic radiation) in November, a finding that fundamentally advanced the field of astrophysics.
+- **Discovery of Pulsars:** Radio astronomers Jocelyn Bell Burnell and Antony Hewish discovered the first pulsar (a rapidly rotating neutron star emitting beams of electromagnetic radiation) in November, a finding that fundamentally advanced the field of astrophysics.
 
-**Venera 4 Probe Reaches Venus:** The Soviet Union's Venera 4 probe successfully entered the atmosphere of Venus on October 18, transmitting the first direct data about the planet's atmospheric composition, temperature, and pressure.
+- **Venera 4 Probe Reaches Venus:** The Soviet Union's Venera 4 probe successfully entered the atmosphere of Venus on October 18, transmitting the first direct data about the planet's atmospheric composition, temperature, and pressure.
 
 """)    
         st.divider()
 
+    
     # Timeline
-    st.slider('Timeline', min_value = 0, max_value = 2025, value = 1967)
+    st.session_state.year = st.slider('Timeline', min_value = 0, max_value = 2025)
 
     # Sidebar section
     with st.sidebar:
