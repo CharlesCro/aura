@@ -76,7 +76,7 @@ def run_streamlit_app():
     with col2:
         if st.button(':material/edit: View/Edit Fields'):
             field()
-        st.subheader(f'See what happened in your fields during :grey[{st.session_state.year}]', divider = 'grey')
+        st.subheader(f'Historical Happeninings during :grey[{st.session_state.year}]', divider = 'grey')
         st.markdown("""
 - **First Human Heart Transplant:** Dr. Christiaan Barnard and his team performed the world's first successful human heart transplantation in Cape Town, South Africa (December 3). Though the patient survived only 18 days, the operation marked a major medical milestone.
 
