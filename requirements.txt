@@ -152,7 +152,6 @@ sqlparse==0.5.3
 sse-starlette==3.0.2
 stack-data==0.6.3
 starlette==0.48.0
-stonefish-license-manager==0.5.40
 stonefish-runtime==0.3.4
 streamlit==1.50.0
 streamlit-pdf==1.0.7
